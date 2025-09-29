@@ -1,0 +1,29 @@
+# Core dependencies
+numpy>=1.21.0
+pandas>=1.3.0
+matplotlib>=3.4.0
+seaborn>=0.11.0
+scipy>=1.7.0
+
+# Data collection
+yfinance>=0.2.0
+
+# Machine Learning
+scikit-learn>=1.0.0
+joblib>=1.1.0
+
+# Deep Learning (optional, comment out if not using LSTM)
+tensorflow>=2.10.0
+
+# Technical Analysis
+ta-lib>=0.4.25  # May require system-level TA-Lib installation
+
+# Visualization
+plotly>=5.10.0
+
+# Dashboard
+dash>=2.6.0
+dash-bootstrap-components>=1.2.0
+
+# Utilities
+python-dateutil>=2.8.0
