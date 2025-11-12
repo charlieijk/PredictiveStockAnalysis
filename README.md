@@ -2,6 +2,9 @@
 
 A comprehensive machine learning system for stock price prediction and analysis using multiple models including Linear Regression, Random Forest, Gradient Boosting, and LSTM neural networks.
 
+> **Notebook-first workflow**  
+> Every former `.py` module is now a Jupyter notebook (`*.ipynb`). Launch them in Jupyter Lab/Notebook or VS Code to run cells instead of invoking scripts from the command line.
+
 ## Features
 
 - **Multiple ML Models**: Linear Regression, Random Forest, Gradient Boosting, LSTM, and Ensemble methods
@@ -9,7 +12,7 @@ A comprehensive machine learning system for stock price prediction and analysis 
 - **Advanced Feature Engineering**: 50+ technical and statistical features
 - **Interactive Dashboard**: Real-time visualization and analysis with Plotly Dash
 - **Backtesting**: Historical performance evaluation
-- **Command-line Interface**: Easy-to-use CLI for predictions
+- **Notebook-first Workflow**: Run end-to-end experiments entirely inside Jupyter notebooks
 
 ## Installation
 
@@ -31,69 +34,49 @@ Note: For TA-Lib, you may need to install system-level dependencies first:
 
 ## Usage
 
-### Command Line Interface
+### Launch the notebooks
 
-#### Run Stock Prediction
-```bash
-python main.py predict AAPL --model all --save
-```
+1. Install dependencies (see [Installation](#installation)).
+2. Start Jupyter Lab/Notebook from the repo root:
+   ```bash
+   jupyter lab
+   # or
+   jupyter notebook
+   ```
+3. Open the notebook that matches the workflow you need:
+   - `main.ipynb`: end-to-end pipeline (data load → feature engineering → training → inference)
+   - `dashboard.ipynb`: Dash/Plotly dashboard utilities
+   - `feature_engineering.ipynb`: feature generation experiments
+   - `models.ipynb`: individual model training/evaluation
+   - `visualization.ipynb`: ad-hoc plotting
+   - `stocks.ipynb`: data download and indicator calculations
+   - `config.ipynb`: tweak configuration objects
+   - `test_structure.ipynb`: structural/unit test scaffolding
 
-Options:
-- `--start-date YYYY-MM-DD`: Start date for historical data
-- `--end-date YYYY-MM-DD`: End date for historical data
-- `--model {linear|random_forest|gradient_boosting|lstm|ensemble|all}`: Model to use
-- `--save`: Save results to CSV file
-
-#### Launch Interactive Dashboard
-```bash
-python main.py dashboard
-```
-Then open http://localhost:8050 in your browser.
-
-#### Train Models
-```bash
-python main.py train AAPL --save-model
-```
-
-#### Run Backtesting
-```bash
-python main.py backtest AAPL --strategy momentum
-```
+Execute cells sequentially to reproduce the original CLI behavior. Key entry points that were previously exposed as `python main.py <command>` are annotated within `main.ipynb`.
 
 ### Python API
+
+All reusable classes/functions remain accessible by importing directly from within a notebook cell, e.g.:
 
 ```python
 from stocks import StockDataCollector
 from feature_engineering import FeatureEngineer
 from models import StockPredictionModels
-
-# Collect data
-collector = StockDataCollector('AAPL', start_date='2022-01-01')
-data = collector.prepare_features()
-
-# Engineer features
-engineer = FeatureEngineer()
-result = engineer.engineer_all_features(data)
-
-# Train models
-trainer = StockPredictionModels()
-trainer.train_random_forest(X_train, y_train, X_val, y_val)
-
-# Make predictions
-predictions = trainer.predict('random_forest', X_test)
 ```
 
 ## Project Structure
 
 ```
 PredictiveStockAnalysis/
-├── stocks.py              # Stock data collection and technical indicators
-├── feature_engineering.py # Advanced feature engineering
-├── models.py              # Machine learning models
-├── visualization.py       # Plotting and visualization
-├── dashboard.py          # Interactive Dash application
-├── config.py             # Configuration settings
-├── main.py               # Main entry point and CLI
+├── stocks.ipynb              # Stock data collection and technical indicators
+├── feature_engineering.ipynb # Advanced feature engineering
+├── models.ipynb              # Machine learning models
+├── visualization.ipynb       # Plotting and visualization
+├── dashboard.ipynb           # Interactive Dash application
+├── config.ipynb              # Configuration settings
+├── main.ipynb                # Main entry point / pipeline driver
+├── test_structure.ipynb      # Structural/unit test harness
 ├── requirements.txt      # Python dependencies
 └── README.md            # This file
 ```
@@ -136,7 +119,7 @@ The system generates 50+ features including:
 
 ## Configuration
 
-Edit `config.py` to customize:
+Open `config.ipynb` (or import `config` inside another notebook) to customize:
 - Data collection settings
 - Model hyperparameters
 - Feature engineering options
