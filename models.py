@@ -48,6 +48,7 @@ class StockPredictionModels:
         self.models = {}
         self.scalers = {}
         self.metrics = {}
+        self.histories = {}
         self.model_dir = 'models'
         os.makedirs(self.model_dir, exist_ok=True)
 
@@ -286,9 +287,9 @@ class StockPredictionModels:
             verbose=lstm_config.get('verbose', 1)
         )
 
-        # Store model and history
+        # Store model and history separately to avoid treating history as a model
         self.models['lstm'] = model
-        self.models['lstm_history'] = history.history
+        self.histories['lstm'] = history.history
 
         # Evaluate if validation data provided
         if X_val is not None and y_val is not None:
@@ -583,10 +584,14 @@ class StockPredictionModels:
             filepath = os.path.join(self.model_dir, f'{model_name}.pkl')
 
         if model_name == 'lstm' and TF_AVAILABLE:
-            # Save Keras model
-            self.models[model_name].save(filepath.replace('.pkl', '.h5'))
+            # Ensure Keras models use a supported extension
+            if not filepath.endswith(('.keras', '.h5')):
+                filepath = f"{filepath}.keras"
+            self.models[model_name].save(filepath)
         else:
-            # Save sklearn model
+            # Ensure sklearn models are saved as .pkl for consistency
+            if not filepath.endswith('.pkl'):
+                filepath = f"{filepath}.pkl"
             joblib.dump(self.models[model_name], filepath)
 
         logger.info(f"Model {model_name} saved to {filepath}")
@@ -603,10 +608,16 @@ class StockPredictionModels:
             filepath = os.path.join(self.model_dir, f'{model_name}.pkl')
 
         if model_name == 'lstm' and TF_AVAILABLE:
-            # Load Keras model
-            self.models[model_name] = load_model(filepath.replace('.pkl', '.h5'))
+            # Adjust extension for Keras models if needed
+            if filepath.endswith('.pkl'):
+                filepath = filepath[:-4] + '.keras'
+            elif not filepath.endswith(('.keras', '.h5')):
+                filepath = f"{filepath}.keras"
+            self.models[model_name] = load_model(filepath)
         else:
-            # Load sklearn model
+            # Ensure sklearn model paths end with .pkl
+            if not filepath.endswith('.pkl'):
+                filepath = f"{filepath}.pkl"
             self.models[model_name] = joblib.load(filepath)
 
         logger.info(f"Model {model_name} loaded from {filepath}")

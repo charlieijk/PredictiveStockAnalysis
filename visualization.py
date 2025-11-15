@@ -193,58 +193,62 @@ class StockVisualizer:
                    [{'type': 'bar'}, {'type': 'scatter'}]]
         )
 
-        # RMSE Comparison
-        fig.add_trace(
-            go.Bar(name='Train RMSE', x=comparison_data['Model'],
-                  y=comparison_data['Train_RMSE']),
-            row=1, col=1
-        )
-        fig.add_trace(
-            go.Bar(name='Val RMSE', x=comparison_data['Model'],
-                  y=comparison_data['Val_RMSE']),
-            row=1, col=1
-        )
+        def _add_bar(name: str, column: str, row: int, col: int, showlegend: bool = True) -> bool:
+            """Utility to add a bar trace when the column exists."""
+            if column in comparison_data.columns:
+                fig.add_trace(
+                    go.Bar(name=name, x=comparison_data['Model'],
+                           y=comparison_data[column], showlegend=showlegend),
+                    row=row, col=col
+                )
+                return True
+            return False
+
+        # RMSE Comparison (fallback to overall RMSE if split metrics unavailable)
+        _add_bar('Train RMSE', 'Train_RMSE', row=1, col=1)
+        if not _add_bar('Val RMSE', 'Val_RMSE', row=1, col=1):
+            _add_bar('Test RMSE', 'RMSE', row=1, col=1)
 
         # R² Score
-        fig.add_trace(
-            go.Bar(name='Train R²', x=comparison_data['Model'],
-                  y=comparison_data['Train_R2'], showlegend=False),
-            row=1, col=2
-        )
-        fig.add_trace(
-            go.Bar(name='Val R²', x=comparison_data['Model'],
-                  y=comparison_data['Val_R2'], showlegend=False),
-            row=1, col=2
-        )
+        _add_bar('Train R²', 'Train_R2', row=1, col=2, showlegend=False)
+        if not _add_bar('Val R²', 'Val_R2', row=1, col=2, showlegend=False):
+            _add_bar('Test R²', 'R2', row=1, col=2, showlegend=False)
 
         # Directional Accuracy
-        fig.add_trace(
-            go.Bar(name='Train Accuracy', x=comparison_data['Model'],
-                  y=comparison_data['Train_DirectionalAcc'], showlegend=False),
-            row=2, col=1
-        )
-        fig.add_trace(
-            go.Bar(name='Val Accuracy', x=comparison_data['Model'],
-                  y=comparison_data['Val_DirectionalAcc'], showlegend=False),
-            row=2, col=1
-        )
+        _add_bar('Train Accuracy', 'Train_DirectionalAcc', row=2, col=1, showlegend=False)
+        if not _add_bar('Val Accuracy', 'Val_DirectionalAcc', row=2, col=1, showlegend=False):
+            _add_bar('Directional Accuracy', 'Directional_Accuracy', row=2, col=1, showlegend=False)
 
-        # Overfitting Analysis
-        fig.add_trace(
-            go.Scatter(x=comparison_data['Train_R2'], y=comparison_data['Val_R2'],
-                      mode='markers+text', text=comparison_data['Model'],
-                      textposition='top center', showlegend=False,
-                      marker=dict(size=10)),
-            row=2, col=2
-        )
+        # Overfitting Analysis (only if both axes available)
+        train_r2_col = 'Train_R2' if 'Train_R2' in comparison_data.columns else None
+        val_r2_col = None
+        if 'Val_R2' in comparison_data.columns:
+            val_r2_col = 'Val_R2'
+        elif 'R2' in comparison_data.columns:
+            val_r2_col = 'R2'
 
-        # Add diagonal reference line
-        fig.add_trace(
-            go.Scatter(x=[0, 1], y=[0, 1], mode='lines',
-                      line=dict(dash='dash', color='gray'),
-                      showlegend=False),
-            row=2, col=2
-        )
+        if train_r2_col and val_r2_col:
+            fig.add_trace(
+                go.Scatter(x=comparison_data[train_r2_col], y=comparison_data[val_r2_col],
+                          mode='markers+text', text=comparison_data['Model'],
+                          textposition='top center', showlegend=False,
+                          marker=dict(size=10)),
+                row=2, col=2
+            )
+
+            # Add diagonal reference line
+            fig.add_trace(
+                go.Scatter(x=[0, 1], y=[0, 1], mode='lines',
+                          line=dict(dash='dash', color='gray'),
+                          showlegend=False),
+                row=2, col=2
+            )
+        else:
+            fig.add_annotation(
+                text='Insufficient data for overfitting plot',
+                x=0.82, y=0.2, xref='paper', yref='paper',
+                showarrow=False, font=dict(color='gray')
+            )
 
         fig.update_layout(height=700, template='plotly_dark', title='Model Comparison')
 

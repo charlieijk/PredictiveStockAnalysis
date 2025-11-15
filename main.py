@@ -292,7 +292,7 @@ class StockPredictionPipeline:
                 'predictions': self.predictions,
                 'actual': self.y_test if len(self.predictions) > 0 else None,
                 'comparison': self.performance,
-                'training_history': self.trainer.models.get('lstm_history', {})
+                'training_history': self.trainer.histories.get('lstm', {})
             }
             
             # Create visualizations
@@ -335,12 +335,28 @@ class StockPredictionPipeline:
         
         # Save predictions
         if self.predictions:
-            predictions_df = pd.DataFrame(self.predictions)
-            predictions_df['actual'] = self.y_test[:len(predictions_df)]
-            predictions_path = os.path.join(config.OUTPUT_DIR,
-                                           f"{self.symbol}_predictions_{datetime.now().strftime('%Y%m%d')}.csv")
-            predictions_df.to_csv(predictions_path, index=False)
-            logger.info(f"Predictions saved to {predictions_path}")
+            prediction_records = []
+            for model_name, preds in self.predictions.items():
+                actual_values = self.y_test_lstm if 'lstm' in model_name.lower() else self.y_test
+                max_length = min(len(preds), len(actual_values))
+
+                for idx in range(max_length):
+                    prediction_records.append({
+                        'Model': model_name,
+                        'Index': idx,
+                        'Prediction': float(preds[idx]),
+                        'Actual': float(actual_values[idx]),
+                        'Dataset': 'lstm_test' if 'lstm' in model_name.lower() else 'test'
+                    })
+
+            if prediction_records:
+                predictions_df = pd.DataFrame(prediction_records)
+                predictions_path = os.path.join(
+                    config.OUTPUT_DIR,
+                    f"{self.symbol}_predictions_{datetime.now().strftime('%Y%m%d')}.csv"
+                )
+                predictions_df.to_csv(predictions_path, index=False)
+                logger.info(f"Predictions saved to {predictions_path}")
         
         # Save summary report
         self.generate_report()
