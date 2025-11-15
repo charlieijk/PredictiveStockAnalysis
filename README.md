@@ -130,7 +130,12 @@ Open `config.ipynb` (or import `config` inside another notebook) to customize:
 
 Codex CLI discovers MCP servers via `~/.config/codex/config.toml`. A matching template is kept in `.codex/config.toml`; copy or merge it into the global config if you need other MCP entries.
 
-1. Ensure the global config contains the `predictive_stock_server` entry (see `.codex/config.toml` for reference). The repo path is already encoded via the `cwd` property.
+1. Run the installer to copy the MCP entry into your global Codex config (this injects the correct absolute path for your clone):
+   ```bash
+   python scripts/install_mcp_config.py
+   # Use --force if you want to overwrite an existing entry.
+   ```
+   (If you prefer manual edits, copy `.codex/config.toml` into `~/.config/codex/config.toml` and replace `__PROJECT_ROOT__` with the absolute path to this repository.)
 2. Install Node.js/npm so `npx` can download and run the `mcp-server` package.
 3. Export any required secrets (e.g., `ALPHA_VANTAGE_API_KEY`, `OPENAI_API_KEY`) before starting Codex. They are whitelisted in the MCP config and will be forwarded to the server.
 4. Launch Codex CLI inside this repository. In the MCP menu, select `predictive_stock_server` and Codex will execute `npx -y mcp-server` here.
