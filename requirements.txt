@@ -11,6 +11,7 @@ yfinance>=0.2.0
 # Machine Learning
 scikit-learn>=1.0.0
 joblib>=1.1.0
+torch>=2.2.0
 
 # Deep Learning (optional, comment out if not using LSTM)
 tensorflow>=2.10.0

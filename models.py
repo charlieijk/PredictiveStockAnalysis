@@ -9,6 +9,7 @@ from typing import Dict, Tuple, Optional, Any
 import logging
 import joblib
 import os
+import config
 
 # Sklearn imports
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
@@ -29,7 +30,20 @@ try:
     TF_AVAILABLE = True
 except ImportError:
     TF_AVAILABLE = False
-    logging.warning("TensorFlow not available. LSTM models will not work.")
+    if config.TRAINING_CONFIG.get('train_lstm', True):
+        logging.warning("TensorFlow not available. LSTM models will not work.")
+    else:
+        logging.info("TensorFlow not installed, but LSTM training is disabled in config.")
+
+try:
+    from asymmetric_world_model import (
+        AsymmetricWorldModelConfig,
+        AsymmetricWorldModelTrainer,
+    )
+    WORLD_MODEL_AVAILABLE = True
+except ImportError:
+    WORLD_MODEL_AVAILABLE = False
+    logging.warning("PyTorch asymmetric world model not available. Install torch to enable it.")
 
 logger = logging.getLogger(__name__)
 
@@ -377,6 +391,36 @@ class StockPredictionModels:
         self.models['ensemble'] = ensemble_models
         return ensemble_models
 
+    def train_asymmetric_world_model(
+        self,
+        features_df: pd.DataFrame,
+        target_series: pd.Series,
+    ) -> Optional[Any]:
+        """
+        Train the PyTorch-based asymmetric world model.
+        """
+        if not WORLD_MODEL_AVAILABLE:
+            logger.error("PyTorch not available. Install torch to use the world model.")
+            return None
+
+        config_dict = self.config.get('asymmetric_world_model', {})
+        awm_config = AsymmetricWorldModelConfig(**config_dict)
+
+        trainer = AsymmetricWorldModelTrainer(
+            config=awm_config,
+            feature_names=list(features_df.columns),
+            output_dir=config.OUTPUT_DIR,
+        )
+        trainer.fit(features_df.values, target_series.values)
+
+        self.models['asymmetric_world_model'] = trainer
+        metrics = trainer.metrics.get('asymmetric_world_model', {})
+        if metrics:
+            self.metrics['asymmetric_world_model'] = metrics.get('test', {})
+
+        logger.info("Asymmetric world model training complete.")
+        return trainer
+
     def predict(self, model_name: str, X: np.ndarray) -> np.ndarray:
         """
         Make predictions using a trained model
@@ -582,6 +626,14 @@ class StockPredictionModels:
 
         if filepath is None:
             filepath = os.path.join(self.model_dir, f'{model_name}.pkl')
+
+        if model_name == 'asymmetric_world_model':
+            if not filepath.endswith('.pt'):
+                filepath = f"{filepath}.pt"
+            trainer = self.models[model_name]
+            trainer.save(filepath)
+            logger.info("World model saved to %s", filepath)
+            return
 
         if model_name == 'lstm' and TF_AVAILABLE:
             # Ensure Keras models use a supported extension

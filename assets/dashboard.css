@@ -1,0 +1,163 @@
+.app-container {
+    min-height: 100vh;
+    padding: 2rem;
+    background: radial-gradient(circle at top, #16213e, #0a0f1f 70%);
+    color: #f5f7ff;
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.title-block {
+    max-width: 600px;
+}
+
+.app-title {
+    margin-bottom: 0.3rem;
+}
+
+.app-subtitle {
+    color: #b7c3ff;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.control-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: rgba(17, 25, 40, 0.7);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.control-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9fb4ff;
+}
+
+#symbol-dropdown {
+    min-width: 200px;
+}
+
+.refresh-button {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.refresh-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.status-text {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #9fb4ff;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-card {
+    padding: 1.1rem 1.3rem;
+    border-radius: 0.85rem;
+    background: rgba(22, 28, 45, 0.9);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.metric-card.empty {
+    border-style: dashed;
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8ba3ff;
+}
+
+.metric-value {
+    margin: 0.3rem 0;
+}
+
+.metric-subtext {
+    font-size: 0.85rem;
+    color: #cdd6ff;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    background: rgba(12, 17, 31, 0.95);
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+    padding: 1rem;
+}
+
+.chart-card {
+    padding: 0.5rem;
+}
+
+.table-card {
+    padding: 1.5rem;
+}
+
+.section-title {
+    margin-bottom: 1rem;
+}
+
+.dashboard-tabs {
+    margin-top: 1rem;
+}
+
+.dashboard-tab {
+    background: rgba(9, 12, 23, 0.8);
+    color: #a9b7ff;
+    border: none;
+    padding: 0.75rem 1.25rem;
+}
+
+.dashboard-tab--selected {
+    background: rgba(33, 45, 80, 0.9);
+    color: #fff;
+    font-weight: 600;
+    border-bottom: 3px solid #7c5dff;
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 1.25rem;
+    }
+
+    .control-panel {
+        width: 100%;
+    }
+}

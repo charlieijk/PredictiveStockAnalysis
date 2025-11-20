@@ -225,6 +225,15 @@ class StockPredictionPipeline:
             logger.info("Ensemble training completed")
         except Exception as e:
             logger.error(f"Error training Ensemble: {str(e)}")
+
+        # Train asymmetric world model if enabled
+        if config.TRAINING_CONFIG.get('train_asymmetric_world_model', False):
+            try:
+                logger.info("Training Asymmetric World Model...")
+                self.trainer.train_asymmetric_world_model(features, target)
+                logger.info("Asymmetric World Model training completed")
+            except Exception as e:
+                logger.error(f"Error training Asymmetric World Model: {str(e)}")
     
     def evaluate_models(self):
         """Evaluate all trained models"""

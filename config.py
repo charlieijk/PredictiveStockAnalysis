@@ -103,6 +103,28 @@ MODEL_CONFIG = {
     'ensemble': {
         'voting': 'soft',  # 'hard' or 'soft'
         'weights': None  # Will be optimized based on validation performance
+    },
+    'asymmetric_world_model': {
+        'sequence_length': 16,
+        'backward_hidden_dim': 96,
+        'backward_layers': 2,
+        'forward_hidden_dims': [128, 64],
+        'bottleneck_dim': 8,
+        'dropout': 0.1,
+        'lr': 1e-3,
+        'weight_decay': 1e-5,
+        'reconstruction_weight': 1.0,
+        'prediction_weight': 1.0,
+        'next_state_weight': 0.5,
+        'batch_size': 64,
+        'epochs': 50,
+        'early_stopping_patience': 7,
+        'train_fraction': 0.7,
+        'val_fraction': 0.15,
+        'activation_logging_batches': 6,
+        'perturbation_std': 0.2,
+        'clip_grad_norm': 1.0,
+        'log_dir': LOG_DIR
     }
 }
 
@@ -121,7 +143,9 @@ TRAINING_CONFIG = {
     },
     'metrics': ['mse', 'rmse', 'mae', 'mape', 'r2', 'directional_accuracy'],
     'save_best_only': True,
-    'verbose': 1
+    'verbose': 1,
+    'train_lstm': False,
+    'train_asymmetric_world_model': True
 }
 
 # Backtesting settings

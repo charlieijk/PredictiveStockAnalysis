@@ -1,9 +1,9 @@
 # Predictive Stock Analysis System
 
-A comprehensive machine learning system for stock price prediction and analysis using multiple models including Linear Regression, Random Forest, Gradient Boosting, and LSTM neural networks.
+A comprehensive machine learning suite for stock price prediction and analysis using Linear Regression, Random Forest, Gradient Boosting, LSTM neural networks, and a PyTorch asymmetric world model.
 
-> **Notebook-first workflow**  
-> Every former `.py` module is now a Jupyter notebook (`*.ipynb`). Launch them in Jupyter Lab/Notebook or VS Code to run cells instead of invoking scripts from the command line.
+> **Dual workflow**  
+> Automate runs through the CLI pipeline or explore interactively in the companion notebooks. Both paths share the same modules, so results stay consistent.
 
 ## Features
 
@@ -12,7 +12,8 @@ A comprehensive machine learning system for stock price prediction and analysis 
 - **Advanced Feature Engineering**: 50+ technical and statistical features
 - **Interactive Dashboard**: Real-time visualization and analysis with Plotly Dash
 - **Backtesting**: Historical performance evaluation
-- **Notebook-first Workflow**: Run end-to-end experiments entirely inside Jupyter notebooks
+- **Dual Workflow**: Automate via the CLI pipeline or run experiments in notebooks
+- **Asymmetric World Model**: Backward GRU + FiLM-modulated forward predictor with neuron diagnostics
 
 ## Installation
 
@@ -34,30 +35,39 @@ Note: For TA-Lib, you may need to install system-level dependencies first:
 
 ## Usage
 
-### Launch the notebooks
+### End-to-end CLI pipeline
 
-1. Install dependencies (see [Installation](#installation)).
-2. Start Jupyter Lab/Notebook from the repo root:
+1. Install dependencies.
+2. Run the orchestrator:
    ```bash
-   jupyter lab
-   # or
-   jupyter notebook
+   python main.py AAPL --dashboard
    ```
-3. Open the notebook that matches the workflow you need:
-   - `main.ipynb`: end-to-end pipeline (data load → feature engineering → training → inference)
-   - `dashboard.ipynb`: Dash/Plotly dashboard utilities
-   - `feature_engineering.ipynb`: feature generation experiments
-   - `models.ipynb`: individual model training/evaluation
-   - `visualization.ipynb`: ad-hoc plotting
-   - `stocks.ipynb`: data download and indicator calculations
-   - `config.ipynb`: tweak configuration objects
-   - `test_structure.ipynb`: structural/unit test scaffolding
+   Key arguments:
+   - `symbol` (required): ticker to process.
+   - `--start-date/--end-date` (optional): override the 3-year default window.
+   - `--dashboard`: automatically launch the Dash UI after training.
+3. Outputs: raw/engineered datasets in `data/`, trained models in `models/`, evaluation reports/plots in `output/`, and logs in `logs/`.
 
-Execute cells sequentially to reproduce the original CLI behavior. Key entry points that were previously exposed as `python main.py <command>` are annotated within `main.ipynb`.
+### Standalone dashboard
 
-### Python API
+Spin up the Plotly Dash interface with the latest saved artifacts:
 
-All reusable classes/functions remain accessible by importing directly from within a notebook cell, e.g.:
+```bash
+python dashboard.py
+```
+The app listens on `http://127.0.0.1:8050` by default (see `config.DASHBOARD_CONFIG` to customize port/host).
+
+### Notebook workflow
+
+Prefer notebooks for experimentation? Launch Jupyter from the repo root:
+
+```bash
+jupyter lab
+# or
+jupyter notebook
+```
+
+Open the notebook that fits your task (`main.ipynb`, `feature_engineering.ipynb`, `models.ipynb`, etc.) and execute cells sequentially. Notebooks import the same underlying modules (`stocks.py`, `feature_engineering.py`, `models.py`, `asymmetric_world_model.py`, …), so the computations mirror CLI runs. Every module remains importable inside a cell:
 
 ```python
 from stocks import StockDataCollector
@@ -65,20 +75,34 @@ from feature_engineering import FeatureEngineer
 from models import StockPredictionModels
 ```
 
+### Run the test suite
+
+Unit tests validate the config scaffolding, feature engineering utilities, and asymmetric world model shim:
+
+```bash
+pytest
+```
+
 ## Project Structure
 
 ```
 PredictiveStockAnalysis/
-├── stocks.ipynb              # Stock data collection and technical indicators
-├── feature_engineering.ipynb # Advanced feature engineering
-├── models.ipynb              # Machine learning models
-├── visualization.ipynb       # Plotting and visualization
-├── dashboard.ipynb           # Interactive Dash application
-├── config.ipynb              # Configuration settings
-├── main.ipynb                # Main entry point / pipeline driver
-├── test_structure.ipynb      # Structural/unit test harness
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+├── main.py                     # CLI pipeline orchestrator
+├── stocks.py                   # Data collection + indicator calculations
+├── feature_engineering.py      # Feature engineering utilities
+├── models.py                   # Sklearn/TensorFlow trainers + ensembling
+├── asymmetric_world_model.py   # PyTorch asymmetric world model + trainer
+├── visualization.py            # Plotting helpers
+├── dashboard.py                # Plotly Dash UI
+├── config.py                   # Global configuration/state directories
+├── api/                        # FastAPI service skeleton
+├── tests/                      # Pytest-based regression tests
+├── data/, models/, output/, logs/   # Runtime artifacts (auto-created)
+├── notebooks (*.ipynb)         # Interactive equivalents of the modules above
+├── requirements.txt            # Python dependencies
+├── requirements_space.txt      # Minimal set for HF Spaces
+├── scripts/                    # Developer tooling (MCP installer, etc.)
+└── README.md                   # This document
 ```
 
 ## Models
@@ -108,6 +132,12 @@ PredictiveStockAnalysis/
 - Weighted averaging
 - Improved robustness
 
+### 6. Asymmetric World Model (PyTorch)
+- Backward GRU reconstructs past states, forward FiLM network predicts next state/return
+- Includes narrow bottleneck (8 units) with log-normal initialisation
+- Logs neuron activation variances and perturbation-based feature importance
+- Enable/disable via `TRAINING_CONFIG['train_asymmetric_world_model']`
+
 ## Features Generated
 
 The system generates 50+ features including:
@@ -125,6 +155,7 @@ Open `config.ipynb` (or import `config` inside another notebook) to customize:
 - Feature engineering options
 - Dashboard settings
 - Backtesting parameters
+- Asymmetric world-model settings (`MODEL_CONFIG['asymmetric_world_model']`)
 
 ## MCP Integration
 
